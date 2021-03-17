@@ -11,7 +11,7 @@ class ReturnsCalculator:
 
         This method gets daily change for portfolio on specified date
         Returns: 
-        Tuple - (amt_change, percent_change, today_close)
+        Dictionary - containing amt_change, percent_change, today_close
         '''
         if self.is_local:
             stock_change_dict = Pricer.get_daily_price(portfolio.get_assets(), date)
