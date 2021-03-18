@@ -21,7 +21,7 @@ class AssetFundamentals:
     def get_stock_fundamental(fundamental, stocks):
         s = ' '.join(stocks)
         tickers = yf.Tickers(s)
-        res = {} # {Industry: [Stocks]}
+        res = {} # {Fundamental: [Stocks]}
         for ticker in tickers.tickers:
             try:
                 asset_class = ticker.info.get('quoteType')
@@ -33,17 +33,10 @@ class AssetFundamentals:
                     res[fnd] = [ticker.ticker]
                 else:
                     res[fnd].append(ticker.ticker)
-                # print('%s: %s' % (ticker.ticker, fnd))
             except:
                 print('No fundamentals for ticker: ', ticker.ticker)
                 continue
-        return res
-
-
-    
-    # def get_industries(stocks: list):
-        
-
+        return res      
 
 
     def get_sector(stock_ticker):
