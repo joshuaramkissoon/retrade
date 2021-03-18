@@ -1,0 +1,1 @@
+from assets.pricer.pricer import Pricer

@@ -1,0 +1,1 @@
+from assets.fundamentals.fundamentals import AssetFundamentals
