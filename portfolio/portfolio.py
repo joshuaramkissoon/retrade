@@ -2,7 +2,7 @@ from data import DataLoader, OrderParser
 from assets.fundamentals import AssetFundamentals
 from assets.pricer import Pricer
 from helpers import DateFormatter, DateHelper
-from constants import DateFormat, OrderColumn, StockFundamentals, Industry
+from constants import DateFormat, OrderColumn, StockFundamentals, PortfolioFilter
 import datetime
 
 class Portfolio:
@@ -77,22 +77,21 @@ class Portfolio:
         except Exception as e:
             raise Exception(e)
 
-    def get_industry_allocations(self, date=None):
-        '''
-        position weight = total value of position / total value of portfolio
-        '''
-        # Categorise stocks by industry
-        industry_dict = self.get_fundamentals(StockFundamentals.industry, date=date)
-        # positions_dict = self.get_positions(date)
-        # prices_dict = Pricer.get_current_price(positions_dict)
+    def get_group_allocations(self, filter: PortfolioFilter, date=None, include_stocks=False):
+        filter_dict = self.get_fundamentals(filter, date=date)
         self.total_val = self.get_total_value(date)
         res = {}
-        for industry in industry_dict:
-            stocks = industry_dict[industry]
+        for group in filter_dict:
+            stocks = filter_dict[group]
             val = self.get_value(stocks, self.positions_dict, self.prices_dict)
             pct = val*100/self.total_val
-            res[industry] = pct
-        return res
+            res[group] = (stocks, pct) if include_stocks else pct
+
+        if include_stocks:
+            sorted_res = sorted([(stock, res[stock][0], res[stock][1]) for stock in res], key=lambda x: x[2], reverse=True)
+        else:
+            sorted_res = sorted([(stock, res[stock]) for stock in res], key=lambda x: x[1], reverse=True)
+        return sorted_res
 
     def get_value(self, stocks, positions, prices):
         '''
