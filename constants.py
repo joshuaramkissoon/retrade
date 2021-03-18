@@ -66,3 +66,7 @@ class USPH:
 class StockFundamentals(Enum):
     industry = 'industry'
     sector = 'sector'
+
+class PortfolioFilter(Enum):
+    industry = 'industry'
+    sector = 'sector'
