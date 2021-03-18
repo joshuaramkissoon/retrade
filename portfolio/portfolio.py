@@ -1,6 +1,7 @@
 from data import DataLoader, OrderParser
+from assets.fundamentals import AssetFundamentals
 from helpers import DateFormatter, DateHelper
-from constants import DateFormat, OrderColumn
+from constants import DateFormat, OrderColumn, StockFundamentals
 import datetime
 
 class Portfolio:
@@ -15,6 +16,23 @@ class Portfolio:
             self.data = DataLoader.load_order_csv(path, cols)
             self.parser = OrderParser(self.data)
             self.positions = self.parser.get_portfolio_on_date(datetime.datetime.now())
+    
+    def get_stocks(self, date=None):
+        '''
+        Returns the stocks in a portfolio on a given date.
+
+        Parameters
+        -----------
+        date: str (YYYY-mm-dd)
+
+        Returns
+        -------
+        list: containing stock tickers
+        '''
+        try:
+            return list(self.get_positions(date).keys())
+        except Exception as e:
+            raise Exception(e)
     
     def get_positions(self, date=None) -> dict:
         '''
@@ -41,4 +59,19 @@ class Portfolio:
             return self.parser.get_portfolio_on_date(dt)
 
 
-    
+    def get_fundamentals(self, fundamental: StockFundamentals, date=None):
+        '''
+        Gets the specified fundamental for all positions in a portfolio on a given date.
+
+        Parameters
+        -----------
+        date: str (YYYY-mm-dd)
+
+        Returns
+        -------
+        dict: containing positions {stock: amount}
+        '''
+        try:
+            return AssetFundamentals.get_stock_fundamental(fundamental, self.get_stocks(date))
+        except Exception as e:
+            raise Exception(e)
