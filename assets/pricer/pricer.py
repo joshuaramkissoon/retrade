@@ -3,6 +3,7 @@ import datetime
 from network.network import get
 from helpers import DateFormatter, DateHelper
 from constants import DateFormat
+import yfinance as yf
 
 class Pricer:
     def __init__(self):
@@ -27,6 +28,21 @@ class Pricer:
         end_str = self.date_formatter.date_to_string(date + datetime.timedelta(days=1))
         results = self.batch_handler(stocks, start=start_str, end=end_str) # Day change value for each stock
         return results
+
+    def get_current_price(self, stocks):
+        s = ' '.join(stocks)
+        tickers = yf.Tickers(s)
+        res = {}
+        for t in tickers.tickers:
+            try:
+                his = t.history(period='1d')
+                if len(his) == 0:
+                    continue
+                close = his.iloc[0]['Close']
+                res[t.ticker] = close
+            except Exception as e:
+                raise Exception(e)
+        return res
 
     def calculate_change(self, portfolio, dc_dict, is_local):
         '''
