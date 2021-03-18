@@ -36,3 +36,6 @@ class DateHelper:
         while not self.is_market_open(dt):
             dt = self.previous_day(dt)
         return dt
+
+    def is_future(self, date):
+        return date > datetime.datetime.now()
