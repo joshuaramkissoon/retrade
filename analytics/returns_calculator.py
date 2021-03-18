@@ -1,4 +1,4 @@
-from pricer import Pricer
+from assets import Pricer
 
 class ReturnsCalculator:
     def __init__(self, is_local):
