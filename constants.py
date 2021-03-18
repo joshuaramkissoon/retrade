@@ -62,3 +62,7 @@ class USPH:
             usph.christmas: 'December 24'
         }
     }
+
+class StockFundamentals(Enum):
+    industry = 'industry'
+    sector = 'sector'
