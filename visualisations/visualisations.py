@@ -16,3 +16,9 @@ def plot_allocations(group_filter: PortfolioFilter, group_data):
     plt.ylabel('Weight Percent')
     plt.title('Portfolio allocations by %s' % group_filter.value)
     plt.show()
+
+def line_plot(yvals, xvals=None):
+    xvals = xvals if xvals else np.arange(len(yvals))
+    plt.figure()
+    plt.plot(xvals, yvals)
+    plt.show()
