@@ -7,6 +7,7 @@ import datetime
 
 class Portfolio:
     def __init__(self, positions=None, path=None, format_data=True):
+        self.industry_data = None
         if positions:
             self.parser = None
             self.positions = positions
@@ -102,12 +103,31 @@ class Portfolio:
             val += positions[stock]*prices[stock]
         return val
 
-    def get_stocks_in_industry(self, industry_data=None, industry: str=None, date=None):
+    def get_stocks_in_industry(self, industry: str, industry_data=None, date=None):
         if not industry_data:
-            industry_data = self.get_fundamentals(StockFundamentals.industry, date)
-        return industry_data.get(industry)
+            self.industry_data = self.get_fundamentals(StockFundamentals.industry, date)
+            # print(self.industry_data)
+        return self.industry_data.get(industry)
 
 
+    def get_industry_value(self, industry: str, date=None):
+        if not self.industry_data:
+            stocks = self.get_stocks_in_industry(industry, date=date)
+        else:
+            stocks = self.industry_data.get(industry)
+        if not stocks:
+            raise Exception('No stocks in industry: %s' % industry)
+        positions = self.get_positions(date)
+        prices_dict = Pricer.get_current_price(positions)
+        vals = {}
+        industry_val = 0
+        for stock in stocks:
+            amount = positions[stock]*prices_dict[stock]
+            industry_val += amount
+            vals[stock] = amount
+        return industry_val, vals
+        
+    
     def get_total_value(self, date=None):
         '''
         Gets the total value of the portfolio.
