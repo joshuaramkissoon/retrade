@@ -29,6 +29,36 @@ class Pricer:
         results = self.batch_handler(stocks, start=start_str, end=end_str) # Day change value for each stock
         return results
 
+    def get_price_history(self, stock, period='1mo'):
+        ticker = yf.Ticker(stock)
+        try:
+            his = ticker.history(period=period)
+            if len(his) == 0:
+                raise Exception('No price data found')
+            return his
+        except Exception as e:
+            raise Exception(e)
+
+    def get_multi_price_history(self, stocks, period='1mo'):
+        tickers = yf.Tickers(' '.join(stocks))
+        res = {}
+        for t in tickers.tickers:
+            his = t.history(period=period)
+            if len(his) == 0:
+                continue
+            res[t.ticker] = his
+        return res
+
+    def historic_data(self, stocks, period='1mo', interval='30m'):
+        data = yf.download(
+            tickers=' '.join(stocks),
+            period=period,
+            interval=interval,
+            group_by='ticker'
+        )
+        return data
+
+
     def get_current_price(self, stocks):
         s = ' '.join(stocks)
         tickers = yf.Tickers(s)
