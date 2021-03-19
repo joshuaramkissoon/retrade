@@ -6,12 +6,16 @@ class ReturnsCalculator:
 
     def get_daily_change(self, portfolio, date):
         '''
-        If ReturnsCalculator is initialised with is_local == True, portfolio is a Portfolio object
-        Otherwise it is a dictionary (key: Stock, val: num_shares)
+        Gets daily change for a portfolio on a given date.
 
-        This method gets daily change for portfolio on specified date
-        Returns: 
-        Dictionary - containing amt_change, percent_change, today_close
+        Parameters
+        ----------
+        portfolio: dict - {stock: amount}
+        date: datetime object
+
+        Returns
+        -------
+        dict - containing amt_change, percent_change, today_close
         '''
         if self.is_local:
             stock_change_dict = Pricer.get_daily_price(portfolio.get_assets(), date)
