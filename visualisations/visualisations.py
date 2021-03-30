@@ -22,3 +22,8 @@ def line_plot(yvals, xvals=None):
     plt.figure()
     plt.plot(xvals, yvals)
     plt.show()
+
+def plot(yvals, xvals=None):
+    xvals = xvals if xvals else np.arange(len(yvals))
+    plt.plot(xvals, yvals)
+    plt.show()
