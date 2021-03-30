@@ -2,7 +2,7 @@ import time
 import datetime
 from network.network import get
 from helpers import DateFormatter, DateHelper
-from constants import DateFormat
+from constants import DateFormat, PriceData
 import yfinance as yf
 
 class Pricer:
@@ -57,6 +57,25 @@ class Pricer:
             group_by='ticker'
         )
         return data
+
+    
+    def get_price_on_date(self, stocks, date, price_data=PriceData.close):
+        start = self.date_formatter.string_to_date(date)
+        if not DateHelper.is_market_open(start):
+            start = DateHelper.get_next_open_day(date=start)
+            print('Specified date is not a market open date. Using the next market open day: ', self.date_formatter.date_to_string(start))
+        end = DateHelper.get_next_open_day(date=start)
+        end_str = self.date_formatter.date_to_string(end)
+        data = yf.download(
+            tickers=' '.join(stocks),
+            start=date,
+            end=end_str,
+            group_by='ticker'
+        )
+        if len(stocks) == 1:
+            return data[price_data.value][0] if len(data) > 0 else None
+        vals = {stock: data[stock][price_data.value][0] for stock in stocks}
+        return vals
 
 
     def get_current_price(self, stocks):
