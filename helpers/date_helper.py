@@ -30,12 +30,22 @@ class DateHelper:
 
     def get_previous_open_day(self, date_string=None, date=None):
         if date_string:
-            dt = self.date_formatter.string_to_date(date_string, '%d-%m-%Y') + datetime.timedelta(days=-1)
+            dt = self.date_formatter.string_to_date(date_string, '%Y-%m-%d') + datetime.timedelta(days=-1)
         if date:
             dt = date + datetime.timedelta(days=-1)
         while not self.is_market_open(dt):
             dt = self.previous_day(dt)
         return dt
+
+    def get_next_open_day(self, date_string=None, date=None):
+        if date_string:
+            dt = self.date_formatter.string_to_date(date_string, '%Y-%m-%d') + datetime.timedelta(days=-1)
+        if date:
+            dt = date + datetime.timedelta(days=1)
+        while not self.is_market_open(dt):
+            dt = self.next_day(dt)
+        return dt
+
 
     def is_future(self, date):
         return date > datetime.datetime.now()
