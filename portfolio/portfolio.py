@@ -2,8 +2,9 @@ from data import DataLoader, OrderParser
 from assets.fundamentals import AssetFundamentals
 from assets.pricer import Pricer
 from helpers import DateFormatter, DateHelper
-from constants import DateFormat, OrderColumn, StockFundamentals, StockGrouping, PortfolioFilter
+from constants import DateFormat, OrderColumn, StockFundamentals, StockGrouping, PortfolioFilter, PriceData
 import datetime
+from math import isnan
 
 class Portfolio:
     def __init__(self, positions=None, path=None, format_data=True):
@@ -150,6 +151,7 @@ class Portfolio:
         Note: Stocks that aren't supported by yfinance API won't be accounted for
         '''
         self.positions_dict = self.get_positions(date)
+        # TODO: Change price to price on specified date instead of current price
         self.prices_dict = Pricer.get_current_price(self.positions_dict)
         val = 0
         stock_vals = {}
@@ -159,5 +161,16 @@ class Portfolio:
             val += amt
         return val, stock_vals
 
-    def summarise_performance(self, date=None):
-        pass
+    def summarise_performance(self, date:str=None):
+        stocks = self.get_stocks(date)
+        curr_date = DateFormatter(DateFormat.ymd_short).string_to_date(date)
+        if not DateHelper.is_market_open(curr_date):
+            raise Exception('Market not open on specified date: %s' % date)
+        prev_date = DateFormatter(DateFormat.ymd_short).date_to_string(DateHelper.get_previous_open_day(date=curr_date))
+        today_close = Pricer.get_price_on_date(stocks, date, PriceData.adj_close)
+        prev_close = Pricer.get_price_on_date(stocks, prev_date, PriceData.adj_close)
+        pct_change = {stock: (today_close[stock] - prev_close[stock])/prev_close[stock] for stock in today_close}
+        pct_change = {k: pct_change[k] for k in pct_change if not isnan(pct_change[k])}
+        sorted_change = sorted([(stock, 100*pct_change[stock]) for stock in pct_change], key=lambda x: x[1], reverse=True)
+        for c in sorted_change:
+            print('%s: %.2f' % (c[0], c[1]))
