@@ -64,9 +64,20 @@ class USPH:
     }
 
 class StockFundamentals(Enum):
+    beta = 'beta'
+
+class StockGrouping(Enum):
     industry = 'industry'
     sector = 'sector'
 
 class PortfolioFilter(Enum):
     industry = 'industry'
     sector = 'sector'
+
+class PriceData(Enum):
+    _open = 'Open'
+    high = 'High'
+    low = 'Low'
+    close = 'Close'
+    adj_close = 'Adj Close'
+    volume = 'Volume'
