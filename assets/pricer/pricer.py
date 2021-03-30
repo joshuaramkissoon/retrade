@@ -60,12 +60,25 @@ class Pricer:
 
     
     def get_price_on_date(self, stocks, date, price_data=PriceData.close):
+        '''
+        Get price of stocks on given date.
+        Parameters
+        ----------
+        stocks: list
+        date: str
+        price_data: PriceData
+        
+        Returns
+        -------
+        float or dict {stock: float}
+        '''
         start = self.date_formatter.string_to_date(date)
         if not DateHelper.is_market_open(start):
             start = DateHelper.get_next_open_day(date=start)
             print('Specified date is not a market open date. Using the next market open day: ', self.date_formatter.date_to_string(start))
         end = DateHelper.get_next_open_day(date=start)
         end_str = self.date_formatter.date_to_string(end)
+        print('start: %s end: %s' % (date, end_str))
         data = yf.download(
             tickers=' '.join(stocks),
             start=date,
@@ -73,8 +86,8 @@ class Pricer:
             group_by='ticker'
         )
         if len(stocks) == 1:
-            return data[price_data.value][0] if len(data) > 0 else None
-        vals = {stock: data[stock][price_data.value][0] for stock in stocks}
+            return data.loc[date][price_data.value] if len(data) > 0 else None
+        vals = {stock: data[stock].loc[date][price_data.value] for stock in stocks}
         return vals
 
 
