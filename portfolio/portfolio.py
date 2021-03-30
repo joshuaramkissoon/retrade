@@ -2,7 +2,7 @@ from data import DataLoader, OrderParser
 from assets.fundamentals import AssetFundamentals
 from assets.pricer import Pricer
 from helpers import DateFormatter, DateHelper
-from constants import DateFormat, OrderColumn, StockFundamentals, PortfolioFilter
+from constants import DateFormat, OrderColumn, StockFundamentals, StockGrouping, PortfolioFilter
 import datetime
 
 class Portfolio:
@@ -60,10 +60,9 @@ class Portfolio:
                 raise Exception('Date must be less than or equal to current date')
             return self.parser.get_portfolio_on_date(dt)
 
-
-    def get_fundamentals(self, fundamental: StockFundamentals, date=None):
+    def get_portfolio_weights(self, date=None):
         '''
-        Gets the specified fundamental for all positions in a portfolio on a given date.
+        Returns the positions and weights for each position in a portfolio on a given date.
 
         Parameters
         -----------
@@ -71,16 +70,33 @@ class Portfolio:
 
         Returns
         -------
-        dict: containing fundamentals {fundamental: list of stocks}
+        dict: containing positions {stock: weight}
+        '''
+        total_val, stock_vals = self.get_total_value(date)
+        return {stock: stock_vals[stock]/total_val for stock in stock_vals}
+
+
+    def get_stocks_by_group(self, group: StockGrouping, date=None):
+        '''
+        Group all stocks in a portfolio on a given date by criteria. Returns all stocks if group is None.
+
+        Parameters
+        -----------
+        group: StockGrouping
+        date: str (YYYY-mm-dd)
+
+        Returns
+        -------
+        dict: containing fundamentals {group: list of stocks}
         '''
         try:
-            return AssetFundamentals.get_stock_fundamental(fundamental, self.get_stocks(date))
+            return AssetFundamentals.get_stocks_by_group(group, self.get_stocks(date))
         except Exception as e:
             raise Exception(e)
 
-    def get_group_allocations(self, filter: PortfolioFilter, date=None, include_stocks=False):
-        filter_dict = self.get_fundamentals(filter, date=date)
-        self.total_val = self.get_total_value(date)
+    def get_group_allocations(self, group: StockGrouping, date=None, include_stocks=False):
+        filter_dict = self.get_stocks_by_group(group, date=date)
+        self.total_val, _ = self.get_total_value(date)
         res = {}
         for group in filter_dict:
             stocks = filter_dict[group]
@@ -105,7 +121,7 @@ class Portfolio:
 
     def get_stocks_in_industry(self, industry: str, industry_data=None, date=None):
         if not industry_data:
-            self.industry_data = self.get_fundamentals(StockFundamentals.industry, date)
+            self.industry_data = self.get_stocks_by_group(StockGrouping.industry, date)
             # print(self.industry_data)
         return self.industry_data.get(industry)
 
@@ -136,6 +152,12 @@ class Portfolio:
         self.positions_dict = self.get_positions(date)
         self.prices_dict = Pricer.get_current_price(self.positions_dict)
         val = 0
+        stock_vals = {}
         for stock in self.prices_dict:
-            val += self.positions_dict[stock]*self.prices_dict[stock]
-        return val
+            amt = self.positions_dict[stock]*self.prices_dict[stock]
+            stock_vals[stock] = amt
+            val += amt
+        return val, stock_vals
+
+    def summarise_performance(self, date=None):
+        pass
